@@ -6,7 +6,7 @@ const inquirer = require("inquirer");
 const {
     discord_password,
     discord_user,
-    SERVER_NAME
+    server_name
 } = require('./config');
 
 const port = 1337;
@@ -50,8 +50,8 @@ const DISCORD_APP_URL = "https://discordapp.com/app";
         await page.keyboard.press('Enter');
     }
 
-    await page.waitForSelector(`a[aria-label="${SERVER_NAME.toString()}"]`);
-    await page.evaluate(() => document.querySelector(`a[aria-label="${SERVER_NAME.toString()}"]`).click());
+    await page.waitForSelector(`a[aria-label="${server_name}"]`);
+    await page.evaluate(() => document.querySelector(`a[aria-label="${server_name}"]`).click());
 
     await autoScroll(page);
 
