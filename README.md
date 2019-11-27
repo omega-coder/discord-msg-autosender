@@ -19,20 +19,20 @@ You will need nodejs and npm installed.
 
 I advise you to create a hidden folder `.discord_project` so it can be used to store your user data.
 
-```
-mkdir ~/.discord_project
-chromium --remote-debugging-port=1337 --user-data-dir=~/.discord_project
+```console
+foo@foobar:~$ mkdir ~/.discord_project
+foo@foobar:~$ chromium --remote-debugging-port=1337 --user-data-dir=~/.discord_project
 ```
 
 now create a `.env` file using the example `.env.example`
 
-```
-cp .env.example .env
+```console
+foo@foobar:~$ cp .env.example .env
 ```
 
 Now edit the .env file with your `discord credentials` and the set the `SERVER_NAME` variable.
 
-```
+```shell
 DISCORD_USER="your_username"
 DISCORD_PASSWORD="your_discord_password"
 
@@ -42,7 +42,7 @@ SERVER_NAME="ShellmatesTeam2020"
 
 Install dependencies using npm
 
-```b
+```properties
 npm install
 ```
 
@@ -50,7 +50,7 @@ npm install
 
 run the script and let it do the work.
 
-```
+```properties
 node index.js
 ```
 
