@@ -16,6 +16,31 @@ const {
 
 const port = 1337;
 const DISCORD_APP_URL = "https://discordapp.com/app";
+const MEME_API = "https://some-random-api.ml/meme"; // Not being used for now
+//const RANDOM_WORDAPI_KEY = 'NW8TVMH0'; // not being used for now
+
+
+axios.interceptors.request.use(function (config) {
+
+    config.metadata = {
+        startTime: new Date()
+    }
+    return config;
+}, function (error) {
+    return Promise.reject(error);
+});
+
+axios.interceptors.response.use(function (response) {
+
+    response.config.metadata.endTime = new Date()
+    response.duration = response.config.metadata.endTime - response.config.metadata.startTime
+    return response;
+}, function (error) {
+    error.config.metadata.endTime = new Date();
+    error.duration = error.config.metadata.endTime - error.config.metadata.startTime;
+    return Promise.reject(error);
+});
+
 
 
 (async () => {
@@ -59,15 +84,21 @@ const DISCORD_APP_URL = "https://discordapp.com/app";
         await page.keyboard.type(discord_password.toString(), {
             delay: 100
         });
-
-        await page.keyboard.press('Enter');
-        if (page.url() === "https://discordapp.com/activity") {
+        await Promise.all([
+            page.keyboard.press('Enter'),
+            page.waitForNavigation()
+        ]);
+        log(page.url());
+        if (page.url() !== "https://discordapp.com/login") {
             log(chalk.bold.green(`[+] Login Successfull!`));
         } else {
             log(error(`[!] Login failed, Exiting now...!`));
+            // eslint-disable-next-line no-undef
             process.exit(1);
         }
     }
+
+
 
     await page.waitForSelector(`a[aria-label="${server_name}"]`);
     await page.evaluate(({
@@ -129,28 +160,58 @@ const DISCORD_APP_URL = "https://discordapp.com/app";
     await page.focus('textarea');
 
     log(warning(`[+] Starting channel flood.`));
-
     try {
         // read contents of the file
         const data = fs.readFileSync('mr_robot.txt', 'UTF-8');
         const lines = data.split(/\r?\n/);
         let n_lines = 1;
         for (let l_indx = 0; l_indx < lines.length; l_indx++) {
-            await page.keyboard.type(lines[l_indx], {
+            let message_length = 0
+            await page.keyboard.type('`' + lines[l_indx] + '`', {
                 delay: 50
             });
             await page.keyboard.press('Enter');
-            log(`[+] Sent ${n_lines} messages to channel ${flood__channel_}`);
+            message_length += lines[l_indx].length
+            log(`[+] Sent ${n_lines} Mr.Robot messages to channel ${flood__channel_}`);
+            await page.keyboard.type('!clear 1', {
+                delay: 50
+            });
+            await page.keyboard.press('Enter');
+            message_length += '!clear 1'.length
             n_lines++;
+            await sleep(60 * 1000 - message_length * 50);
         }
+
+        /* let meme = await axios.get(MEME_API);
+        let message_length = 0
+        await page.keyboard.type('`' + meme.data.caption + '`', {
+            delay: 50
+        });
+        await page.keyboard.press('Enter');
+        message_length += meme.data.caption.length;
+        await page.keyboard.type(meme.data.image, {
+            delay: 50
+        });
+        await page.keyboard.press('Enter');
+        message_length += meme.data.image.length
+        log(`[+] Sent ${n_memes} memes to channel ${flood__channel_}`);
+        await sleep(60 * 1000 - meme.duration - message_length * 50);
+        n_memes++
+        */
+
     } catch (err) {
         log(error(err.toString()));
     }
-
 })();
+
+
+const sleep = (ms) => {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 async function autoScroll(page) {
     await page.evaluate(async () => {
+        // eslint-disable-next-line no-unused-vars
         await new Promise((resolve, reject) => {
             var totalHeight = 0;
             var distance = 1000;
